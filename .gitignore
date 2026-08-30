@@ -1,0 +1,9 @@
+# AI agent config
+CLAUDE.md
+AGENTS.md
+.claude/
+.agents/
+.kiro/
+.vscode/
+.atl/
+openspec/
