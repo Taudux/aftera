@@ -433,13 +433,17 @@ body.nr-mode .cursor{mix-blend-mode:normal;background:var(--violet);opacity:.55}
 .nr-card.row h3{font-size:22px;margin:6px 0 0}
 .nr-card.row p{display:none}
 .nr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(22px,3vw,40px) clamp(18px,2.4vw,32px)}
-.nr-press{background:var(--ink);color:#fff;border-radius:12px;padding:clamp(26px,4vw,56px);margin-top:clamp(50px,6vw,80px)}
-.nr-press-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;flex-wrap:wrap;margin-bottom:26px}
-.nr-press-head h2{font-family:var(--serif);font-weight:400;font-size:clamp(40px,5vw,76px);line-height:.95}
-.nr-press-head h2 em{color:var(--lime)}
-.nr-press-head p{max-width:380px;color:var(--muted);font-size:15px}
-.nr-pr{display:grid;grid-template-columns:150px 1fr auto;gap:20px;align-items:center;padding:18px 0;border-top:1px solid rgba(255,255,255,.14)}
-.nr-pr time{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--lime)}
+.nr-press{background:var(--ink);color:#fff;border-radius:16px;padding:clamp(32px,4.5vw,72px) clamp(24px,4.5vw,70px) clamp(40px,5vw,90px);margin-top:clamp(50px,6vw,80px)}
+.nr-press-head{display:flex;justify-content:space-between;gap:24px 40px;align-items:flex-end;flex-wrap:wrap;padding-bottom:clamp(24px,2.4vw,36px)}
+.nr-press-head h2{font-family:var(--serif);font-weight:400;font-size:clamp(52px,7vw,104px);line-height:.95;letter-spacing:-.02em}
+.nr-press-head h2 em{font-style:italic;color:var(--lime)}
+.nr-press-head p{max-width:460px;color:var(--muted);font-size:clamp(15px,1.1vw,18px);line-height:1.55}
+.nr-pr{display:grid;grid-template-columns:180px 1fr auto;gap:20px 32px;align-items:center;padding-block:clamp(22px,2vw,28px);border-top:1px solid rgba(255,255,255,.14)}
+.nr-pr .lbl{font-size:13px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--lime);line-height:1.7}
+.nr-pr .txt{font-size:clamp(16px,1.25vw,19px);line-height:1.55;letter-spacing:-.01em}
+.nr-press .pill{padding:13px 18px;font-size:15px;letter-spacing:-.01em;border-color:rgba(255,255,255,.85)}
+.nr-press .pill:hover{border-color:var(--lime)}
+@media (max-width:760px){.nr-pr{grid-template-columns:1fr;gap:12px}.nr-pr .acts{margin-top:4px}}
 .nr-pr a.t{font-family:var(--serif);font-size:clamp(20px,2vw,28px);line-height:1.1}
 .nr-pr a.t:hover{color:var(--lime)}
 .nr-pr .acts{display:flex;gap:8px}
@@ -635,7 +639,6 @@ body.nr-mode .cursor{mix-blend-mode:normal;background:var(--violet);opacity:.55}
 }
 @media (max-width:640px){
   .nr-grid{grid-template-columns:1fr}
-  .nr-pr{grid-template-columns:1fr;gap:8px}
   .nr-card.row{grid-template-columns:96px 1fr}
   .adm-row{grid-template-columns:64px 1fr;gap:12px}
   .adm-row .th{width:64px}
@@ -1635,7 +1638,7 @@ function renderList(){
   const filtering=st.q||st.cat||st.month, list=filtering?filtered():all;
   q("#nrCount").textContent=list.length?`${list.length} ${list.length===1?"publicación":"publicaciones"}`:"";
   if(!all.length){
-    body.innerHTML=`<div class="nr-empty"><span class="kicker">Edición en preparación</span><h3>Muy pronto, las primeras noticias de AFTERA.</h3><p>Aquí publicaremos proyectos, eventos, comunicados de prensa y la actualidad de la agencia.</p>${isEditor?'<a href="/admin" class="pill solid" data-new="1">Crear la primera publicación →</a>':'<a href="https://www.instagram.com/aftera.qro/" target="_blank" rel="noopener" class="pill solid">Síguenos en Instagram →</a>'}</div>`;
+    body.innerHTML=`<div class="nr-empty"><span class="kicker">Edición en preparación</span><h3>Muy pronto, las primeras noticias de AFTERA.</h3><p>Aquí publicaremos proyectos, eventos, comunicados de prensa y la actualidad de la agencia.</p>${isEditor?'<a href="/admin" class="pill solid" data-new="1">Crear la primera publicación →</a>':'<a href="https://www.instagram.com/aftera.qro/" target="_blank" rel="noopener" class="pill solid">Síguenos en Instagram →</a>'}</div>${pressSection()}`;
     return;
   }
   if(filtering){
@@ -1649,10 +1652,13 @@ function renderList(){
   body.innerHTML=`
     <section class="nr-lead" aria-label="Noticia destacada">${card(lead,"xl")}<div class="nr-side">${side.map(p=>card(p,"row")).join("")}</div></section>
     ${more.length?`<div class="nr-sec-t"><h2>Lo más reciente</h2><span>Actualidad AFTERA</span></div><div class="nr-grid">${more.map(p=>card(p)).join("")}</div>`:""}
-    <section class="nr-press" aria-label="Sala de prensa">
+    ${pressSection()}`;
+}
+function pressSection(){
+  return `<section class="nr-press" aria-label="Sala de prensa">
       <div class="nr-press-head"><h2>Sala de <em>prensa</em></h2><p>¿Organizas un evento, lanzamiento o rueda de prensa? Envíanos tu invitación y con gusto te acompañamos.</p></div>
-      <div class="nr-pr"><time>Invitaciones a medios</time><span>Envíanos la invitación a tu evento.</span><div class="acts"><a class="pill" href="${MEDIA_WA}?text=${encodeURIComponent("Hola AFTERA, nos gustaría invitarlos a nuestro evento. Les compartimos los detalles: ")}" target="_blank" rel="noopener">Enviar invitación</a></div></div>
-      <div class="nr-pr"><time>Publica con nosotros</time><span>¿Quieres publicar una noticia, un comunicado o tener una nota editorial en Noticias AFTERA? Contáctanos por WhatsApp para más información.</span><div class="acts"><a class="pill" href="${MEDIA_WA}?text=${encodeURIComponent("Hola AFTERA, me interesa publicar en Noticias AFTERA. ¿Me pueden dar más información?")}" target="_blank" rel="noopener">WhatsApp</a></div></div>
+      <div class="nr-pr"><span class="lbl">Invitaciones a medios</span><span class="txt">Envíanos la invitación a tu evento.</span><div class="acts"><a class="pill" href="${MEDIA_WA}?text=${encodeURIComponent("Hola AFTERA, nos gustaría invitarlos a nuestro evento. Les compartimos los detalles: ")}" target="_blank" rel="noopener">Enviar invitación</a></div></div>
+      <div class="nr-pr"><span class="lbl">Publica con nosotros</span><span class="txt">¿Quieres publicar una noticia, un comunicado o tener una nota editorial en Noticias AFTERA? Contáctanos por WhatsApp para más información.</span><div class="acts"><a class="pill" href="${MEDIA_WA}?text=${encodeURIComponent("Hola AFTERA, me interesa publicar en Noticias AFTERA. ¿Me pueden dar más información?")}" target="_blank" rel="noopener">WhatsApp</a></div></div>
     </section>`;
 }
 function clearFilters(){st.q="";st.cat="";st.month="";q("#nrQ").value="";renderCats();renderMonths();renderList()}
