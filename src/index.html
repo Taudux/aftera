@@ -1753,7 +1753,7 @@ function renderArticle(id){
         ${vids?`<div class="art-block"><h4>Video y multimedia</h4><div class="art-vid">${vids}</div></div>`:""}
         ${links?`<div class="art-block"><h4>Enlaces relacionados</h4><div class="art-links">${links}</div></div>`:""}
         ${(p.tags||[]).length?`<div class="art-block"><h4>Etiquetas</h4><div class="tags">${p.tags.map(t=>`<button data-tag="${esc(t)}">#${esc(t)}</button>`).join("")}</div></div>`:""}
-        <div class="art-block"><div class="press-box"><h4>${isPress?"Contacto para medios":"¿Eres medio de comunicación?"}</h4><p>Para entrevistas, material adicional o información sobre AFTERA: ${MEDIA_MAIL} · WhatsApp ${MEDIA_TEL}.</p>
+        <div class="art-block"><div class="press-box"><h4>${isPress?"Contacto para medios":"¿Eres medio de comunicación?"}</h4><p>Para entrevistas, material adicional o información de AFTERA contáctanos.</p>
           <div class="row"><a class="pill" href="${MEDIA_WA}?text=${enc("Hola AFTERA, los contacto por la nota: "+p.title)}" target="_blank" rel="noopener">Contactar por WhatsApp</a><a class="pill" href="mailto:${MEDIA_MAIL}?subject=${enc("Prensa: "+p.title)}">Escribir correo</a></div></div></div>
         <div class="art-block"><div class="press-box pub-box"><h4>Publica en Noticias AFTERA</h4><p>Si tu marca o empresa quiere publicar una noticia, un comunicado o tener una nota editorial con nosotros, contáctanos por WhatsApp para más información.</p><div class="row"><a class="pill" href="${MEDIA_WA}?text=${enc("Hola AFTERA, me interesa publicar en Noticias AFTERA. ¿Me pueden dar más información?")}" target="_blank" rel="noopener">Escribir por WhatsApp</a></div></div></div>
       </div>
