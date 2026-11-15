@@ -5,19 +5,19 @@
   "rewrites": [
     {
       "source": "/noticias/:slug",
-      "destination": "/src/index.html"
+      "destination": "/src"
     },
     {
       "source": "/noticias",
-      "destination": "/src/index.html"
+      "destination": "/src"
     },
     {
       "source": "/admin",
-      "destination": "/src/index.html"
+      "destination": "/src"
     },
     {
       "source": "/",
-      "destination": "/src/index.html"
+      "destination": "/src"
     },
     {
       "source": "/assets/:path*",
@@ -47,7 +47,7 @@
       ]
     },
     {
-      "source": "/src/index.html",
+      "source": "/src",
       "headers": [
         {
           "key": "Cache-Control",
