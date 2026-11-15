@@ -452,8 +452,7 @@ body.nr-mode .cursor{mix-blend-mode:normal;background:var(--violet);opacity:.55}
 .nr-empty p{color:rgba(11,11,15,.65);max-width:460px;margin:0 auto 22px}
 .skel{background:linear-gradient(90deg,rgba(11,11,15,.06),rgba(11,11,15,.12),rgba(11,11,15,.06));background-size:200% 100%;animation:sk 1.4s infinite;border-radius:6px}
 @keyframes sk{to{background-position:-200% 0}}
-.nr-foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:3px double var(--ink);margin-top:clamp(60px,8vw,110px);padding-block:26px 90px;font-size:13px;color:rgba(11,11,15,.65)}
-.nr-foot a:hover{color:var(--violet)}
+.nr-foot{background:var(--ink);margin-top:clamp(60px,8vw,110px);height:clamp(90px,9vw,140px);padding:0}
 
 /* Article */
 .art{padding-bottom:40px}
@@ -1242,11 +1241,7 @@ a,button,.soc,.tile,.m-card,.svc-btn,.chip,.channel{-webkit-tap-highlight-color:
 
     <div id="nrArticle" hidden></div>
 
-    <footer class="nr-foot wrap">
-      <span>Noticias AFTERA · Querétaro, México</span>
-      <span>Prensa y medios: <a href="mailto:aftera.qro@gmail.com">aftera.qro@gmail.com</a> · <a href="https://wa.me/524461177186">+52 446 117 7186</a></span>
-      <a href="#inicio">Volver a AFTERA →</a>
-    </footer>
+    <footer class="nr-foot" aria-hidden="true"></footer>
   </div>
 
   <div id="nrAdmin" hidden></div>
