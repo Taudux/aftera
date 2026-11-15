@@ -39,7 +39,8 @@
   --pad:clamp(20px,5vw,72px);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;overflow-x:clip}
+html{-webkit-text-size-adjust:100%;overflow-x:clip}
+@media (hover:hover) and (pointer:fine){html{scroll-behavior:smooth}}
 body{font-family:var(--sans);background:var(--ink);color:var(--white);line-height:1.5;overflow-x:clip;-webkit-font-smoothing:antialiased}
 img,svg{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
@@ -1549,7 +1550,7 @@ function route(hh){
   curHash=h;
   const nr=isNrHash(h);
   document.body.classList.toggle("nr-mode",nr);
-  if(!nr){resetSEO();if(h){const el=document.getElementById(h);if(el)requestAnimationFrame(()=>el.scrollIntoView())}return}
+  if(!nr){resetSEO();if(h){const el=document.getElementById(h);if(el)requestAnimationFrame(()=>el.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}))}return}
   window.scrollTo(0,0);
   renderAll();
 }
