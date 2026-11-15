@@ -126,10 +126,6 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 .wordmark span.last{color:var(--lime)}
 .wm-mask{overflow-x:visible;overflow-y:clip;padding-bottom:.02em}
 @keyframes rise{to{transform:none}}
-.hero-meta{position:relative;display:flex;justify-content:space-between;font-size:12px;letter-spacing:.2em;text-transform:uppercase;padding-block:18px 26px;border-top:1px solid rgba(255,255,255,.18);margin-top:10px;color:var(--muted);gap:14px;flex-wrap:wrap}
-.scroll-cue{display:inline-flex;gap:10px;align-items:center}
-.scroll-cue i{width:1px;height:26px;background:var(--lime);display:inline-block;animation:cue 2s infinite}
-@keyframes cue{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 
 /* MARQUEE */
 .marquee{background:var(--lime);color:var(--ink);overflow:hidden;padding:13px 0;position:relative;z-index:3;border-block:1px solid rgba(11,11,15,.08)}
@@ -728,13 +724,11 @@ body.on-cover .nav{opacity:0;transform:translateY(-100%);pointer-events:none}
 .hero h1{max-width:15ch;margin-inline:auto;font-size:clamp(44px,7vw,118px)!important}
 .hero-side{max-width:660px;margin-inline:auto;text-align:center;font-size:clamp(16px,1.35vw,20px)}
 .hero-side .row{justify-content:center;margin-top:28px}
-.hero-meta{justify-content:center;gap:12px 40px;text-align:center}
-.hero-meta .scroll-cue{display:none}
 .sec-head h2,.latest-head h2,.social-head h3,.contact h2,.clients-box h2{font-size:var(--h2);line-height:var(--h2-lh);letter-spacing:-.045em}
 .statement{font-size:var(--h2)!important;line-height:1.02}
 .diff-intro{font-size:calc(var(--h2)*.8)}
 .cta h2{font-size:calc(var(--h2)*1.45)}
-@media (max-width:600px){.hero{padding-top:120px}.hero-meta{flex-direction:column;align-items:center}}
+@media (max-width:600px){.hero{padding-top:120px;padding-bottom:48px}}
 /* ===== Toque: pulso suave ===== */
 a,button,.soc,.tile,.m-card,.svc-btn,.chip,.channel{-webkit-tap-highlight-color:transparent}
 .btn:active,.chip:active,.soc:active,.channel:active,.tab:active{transform:scale(.95)}
@@ -941,18 +935,13 @@ a,button,.soc,.tile,.m-card,.svc-btn,.chip,.channel{-webkit-tap-highlight-color:
         </div>
       </div>
     </div>
-    <div class="hero-meta">
-      <span>6 años de trayectoria · Relaciones públicas · Experiencias</span>
-      <span class="scroll-cue"><i></i>Desliza</span>
-      <span>Querétaro, MX</span>
-    </div>
   </div>
 </section>
 
-<div class="marquee" role="region" aria-label="Servicios de AFTERA: Relaciones públicas, Eventos corporativos, Activaciones de marca, Lanzamientos, Identidad de marca, Marketing digital, Marketing de influencia, Querétaro.">
+<div class="marquee" role="region" aria-label="AFTERA: 6 años de trayectoria, Relaciones públicas, Eventos corporativos, Activaciones de marca, Lanzamientos, Identidad de marca, Marketing digital, Marketing de influencia, Querétaro.">
   <div class="marquee-track">
-    <span>Relaciones públicas</span><span>Eventos corporativos</span><span>Activaciones de marca</span><span>Lanzamientos</span><span>Identidad de marca</span><span>Marketing digital</span><span>Marketing de influencia</span><span>Querétaro</span>
-    <span>Relaciones públicas</span><span>Eventos corporativos</span><span>Activaciones de marca</span><span>Lanzamientos</span><span>Identidad de marca</span><span>Marketing digital</span><span>Marketing de influencia</span><span>Querétaro</span>
+    <span>6 años de trayectoria</span><span>Relaciones públicas</span><span>Eventos corporativos</span><span>Activaciones de marca</span><span>Lanzamientos</span><span>Identidad de marca</span><span>Marketing digital</span><span>Marketing de influencia</span><span>Querétaro</span>
+    <span>6 años de trayectoria</span><span>Relaciones públicas</span><span>Eventos corporativos</span><span>Activaciones de marca</span><span>Lanzamientos</span><span>Identidad de marca</span><span>Marketing digital</span><span>Marketing de influencia</span><span>Querétaro</span>
   </div>
 </div>
 
