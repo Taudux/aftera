@@ -2152,7 +2152,8 @@ void main(){
   const uRes=gl.getUniformLocation(pr,"uRes"),uTime=gl.getUniformLocation(pr,"uTime"),uMouse=gl.getUniformLocation(pr,"uMouse"),uScroll=gl.getUniformLocation(pr,"uScroll");
 
   let scale=innerWidth<700?0.7:0.85, W=0,H=0;
-  function resize(){const dpr=Math.min(devicePixelRatio||1,1.5);W=Math.max(2,Math.round(cv.clientWidth*dpr*scale));H=Math.max(2,Math.round(cv.clientHeight*dpr*scale));cv.width=W;cv.height=H;gl.viewport(0,0,W,H)}
+  // Safari dispara resize al colapsar sus barras; solo se reasigna el lienzo si el tamaño cambia
+  function resize(){const dpr=Math.min(devicePixelRatio||1,1.5),w=Math.max(2,Math.round(cv.clientWidth*dpr*scale)),h=Math.max(2,Math.round(cv.clientHeight*dpr*scale));if(w===W&&h===H)return;W=w;H=h;cv.width=W;cv.height=H;gl.viewport(0,0,W,H)}
   resize();addEventListener("resize",resize);
 
   let mx=0,my=0,tmx=0,tmy=0;
