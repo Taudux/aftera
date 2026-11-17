@@ -498,6 +498,7 @@ body.nr-mode .cursor{mix-blend-mode:normal;background:var(--violet);opacity:.55}
 .vid-frame iframe,.vid-frame video{width:100%;height:100%;border:0;display:block;border-radius:0}
 /* Drive: el reproductor se dibuja a 1920×1080 más dos franjas de 170px (sus controles), que quedan fuera del recuadro */
 .vid-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.vid-frame.tap{cursor:pointer}.vid-frame.tap:not(.live)::after{content:"";position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:rgba(11,11,15,.62) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M5.5 3.5v9l7.5-4.5z' fill='%23fff'/%3E%3C/svg%3E") center/28px no-repeat}
 .vid-frame.crop iframe{position:absolute;left:0;top:calc(-170px*var(--s,1));width:1920px;height:1420px;transform-origin:0 0;transform:scale(var(--s,1))}
 .linkcard{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:18px 20px;border:1.5px solid var(--ink);border-radius:12px;font-weight:600;transition:all .25s}
 .linkcard small{display:block;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--violet);font-weight:700}
@@ -1559,11 +1560,15 @@ function videoEmbed(u){
   if(/\.(mp4|webm|mov)(?:[?#]|$)/i.test(s))return {file:s};
   return null;
 }
-// Reproductores de Drive: escala al ancho del recuadro; el iframe se crea al llegar al video (arranca solo) y se quita al salir (no se puede pausar desde fuera)
+// Reproductores de Drive: escala al ancho del recuadro. En computadora el iframe se crea al llegar al video (arranca solo);
+// en pantallas táctiles el navegador bloquea ese arranque, así que se queda la miniatura y el iframe se crea al tocar.
+// Al salir de la pantalla se quita, porque el reproductor de Drive no se puede pausar desde fuera.
 const driveRO=window.ResizeObserver?new ResizeObserver(es=>es.forEach(e=>e.target.style.setProperty("--s",e.contentRect.width/1920))):null;
-function driveOn(f){if(f.querySelector("iframe"))return;const i=document.createElement("iframe");i.src=f.dataset.src;i.title="Video";i.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";f.appendChild(i)}
-const driveIO=window.IntersectionObserver?new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.6)driveOn(e.target);else if(!e.isIntersecting){const i=e.target.querySelector("iframe");if(i)i.remove()}}),{threshold:[0,.6]}):null;
-function fitDrive(){if(driveRO)driveRO.disconnect();if(driveIO)driveIO.disconnect();document.querySelectorAll(".vid-frame.crop").forEach(f=>{f.style.setProperty("--s",f.clientWidth/1920);const im=f.querySelector(".vid-poster");if(im)im.onerror=()=>{im.onerror=()=>im.remove();setTimeout(()=>{im.src=im.src},1500)};if(driveRO)driveRO.observe(f);if(driveIO)driveIO.observe(f);else driveOn(f)})}
+const driveAuto=matchMedia("(hover:hover) and (pointer:fine)").matches;
+function driveOn(f){if(f.querySelector("iframe"))return;const i=document.createElement("iframe");i.src=f.dataset.src;i.title="Video";i.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";f.appendChild(i);f.classList.add("live")}
+function driveOff(f){const i=f.querySelector("iframe");if(i)i.remove();f.classList.remove("live")}
+const driveIO=window.IntersectionObserver?new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.6){if(driveAuto)driveOn(e.target)}else if(!e.isIntersecting)driveOff(e.target)}),{threshold:[0,.6]}):null;
+function fitDrive(){if(driveRO)driveRO.disconnect();if(driveIO)driveIO.disconnect();document.querySelectorAll(".vid-frame.crop").forEach(f=>{f.style.setProperty("--s",f.clientWidth/1920);const im=f.querySelector(".vid-poster");if(im)im.onerror=()=>{im.onerror=()=>im.remove();setTimeout(()=>{im.src=im.src},1500)};if(driveRO)driveRO.observe(f);if(driveIO)driveIO.observe(f);if(!driveAuto||!driveIO){f.classList.add("tap");f.tabIndex=0;f.setAttribute("role","button");f.setAttribute("aria-label","Reproducir video");f.onclick=()=>driveOn(f);f.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();driveOn(f)}}}})}
 function imgUrl(u){
   const s=String(u||"").trim(),m=s.match(/drive\.google\.com\/(?:file\/d\/|open\?(?:[^#]*&)?id=|uc\?(?:[^#]*&)?id=)([A-Za-z0-9_-]+)/);
   return m?"https://drive.google.com/thumbnail?id="+m[1]+"&sz=w2000":safeUrl(s);
