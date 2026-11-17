@@ -493,6 +493,11 @@ body.nr-mode .cursor{mix-blend-mode:normal;background:var(--violet);opacity:.55}
 .art-gal button:first-child:nth-last-child(odd){grid-column:span 2;grid-row:span 2}
 .art-vid{display:grid;gap:14px}
 .art-vid video{width:100%;border-radius:10px;background:#000}
+.vid{margin:0}
+.vid-frame{position:relative;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#000}.vid-frame.tall{aspect-ratio:9/16;max-width:360px}
+.vid-frame iframe,.vid-frame video{width:100%;height:100%;border:0;display:block;border-radius:0}
+/* Drive: el reproductor se dibuja a 1920×1080 más dos franjas de 170px (sus controles), que quedan fuera del recuadro */
+.vid-frame.crop iframe{position:absolute;left:0;top:calc(-170px*var(--s,1));width:1920px;height:1420px;transform-origin:0 0;transform:scale(var(--s,1))}
 .linkcard{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:18px 20px;border:1.5px solid var(--ink);border-radius:12px;font-weight:600;transition:all .25s}
 .linkcard small{display:block;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--violet);font-weight:700}
 .linkcard:hover{background:var(--ink);color:#fff}
@@ -1541,6 +1546,21 @@ function mdToHtml(text){
   return out.join("");
 }
 // enlace de compartir de Google Drive → imagen directa (el archivo debe estar compartido con "cualquier persona con el enlace")
+// Enlace de video de la hoja → reproductor dentro de la nota ({src,tall} iframe, {file} video directo o null = tarjeta)
+function videoEmbed(u){
+  const s=safeUrl(String(u||"").trim());if(!s)return null;let m;
+  if(m=s.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]{6,})/))return {src:"https://www.youtube-nocookie.com/embed/"+m[1],tall:true};
+  if(m=s.match(/(?:youtube\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/))return {src:"https://www.youtube-nocookie.com/embed/"+m[1]};
+  if(m=s.match(/vimeo\.com\/(?:video\/)?(\d+)/))return {src:"https://player.vimeo.com/video/"+m[1]};
+  if(m=s.match(/drive\.google\.com\/(?:file\/d\/|open\?(?:[^#]*&)?id=)([A-Za-z0-9_-]+)/))return {src:"https://drive.google.com/file/d/"+m[1]+"/preview",drive:true};
+  if(m=s.match(/instagram\.com\/(?:[A-Za-z0-9_.]+\/)?(?:p|reels?|tv)\/([A-Za-z0-9_-]+)/))return {src:"https://www.instagram.com/p/"+m[1]+"/embed",tall:true};
+  if(m=s.match(/tiktok\.com\/@[^/?#]+\/video\/(\d+)/))return {src:"https://www.tiktok.com/embed/v2/"+m[1],tall:true};
+  if(/\.(mp4|webm|mov)(?:[?#]|$)/i.test(s))return {file:s};
+  return null;
+}
+// Ajusta la escala de los reproductores de Drive al ancho de su recuadro
+const driveRO=window.ResizeObserver?new ResizeObserver(es=>es.forEach(e=>e.target.style.setProperty("--s",e.contentRect.width/1920))):null;
+function fitDrive(){if(driveRO)driveRO.disconnect();document.querySelectorAll(".vid-frame.crop").forEach(f=>{f.style.setProperty("--s",f.clientWidth/1920);if(driveRO)driveRO.observe(f)})}
 function imgUrl(u){
   const s=String(u||"").trim(),m=s.match(/drive\.google\.com\/(?:file\/d\/|open\?(?:[^#]*&)?id=|uc\?(?:[^#]*&)?id=)([A-Za-z0-9_-]+)/);
   return m?"https://drive.google.com/thumbnail?id="+m[1]+"&sz=w2000":safeUrl(s);
@@ -1724,7 +1744,7 @@ function renderArticle(id){
   const live=isLive(p), isPress=p.category===PRESS, body=sanitize(p.body), words=plain(body).split(" ").filter(Boolean).length, mins=Math.max(1,Math.round(words/200));
   const url=shareUrl(p), enc=encodeURIComponent, txt=enc(p.title);
   galItems=(p.gallery||[]).filter(Boolean);
-  const vids=(p.videos||[]).map(v=>v.kind==="file"?`<video controls preload="metadata" src="${blobUrl(v.id)}"></video>`:safeUrl(v.url)?`<a class="linkcard" href="${esc(v.url)}" target="_blank" rel="noopener"><span><small>Video · ${esc(host(v.url))}</small>${esc(v.label||"Ver video")}</span><span><svg class="i-arr" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg></span></a>`:"").join("");
+  const vids=(p.videos||[]).map(v=>{const e=v.kind==="file"?null:videoEmbed(v.url);return e?`<figure class="vid"><div class="vid-frame${e.tall?" tall":""}${e.drive?" crop":""}">${e.file?`<video controls preload="metadata" src="${esc(e.file)}"></video>`:`<iframe src="${esc(e.src)}" title="${esc(v.label||"Video")}" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture; fullscreen"></iframe>`}</div></figure>`:v.kind==="file"?`<video controls preload="metadata" src="${blobUrl(v.id)}"></video>`:safeUrl(v.url)?`<a class="linkcard" href="${esc(v.url)}" target="_blank" rel="noopener"><span><small>Video · ${esc(host(v.url))}</small>${esc(v.label||"Ver video")}</span><span><svg class="i-arr" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg></span></a>`:""}).join("");
   const links=(p.links||[]).filter(l=>safeUrl(l.url)).map(l=>`<a class="linkcard" href="${esc(l.url)}" target="_blank" rel="noopener"><span><small>${esc(host(l.url))}</small>${esc(l.label||l.url)}</span><span><svg class="i-arr" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4.5 11.5l7-7M6 4.5h5.5V10"/></svg></span></a>`).join("");
   const rel=[...visible().filter(x=>x.id!==p.id&&x.category===p.category),...visible().filter(x=>x.id!==p.id&&x.category!==p.category)].slice(0,3);
   el.innerHTML=`<article class="art">
@@ -1749,8 +1769,8 @@ function renderArticle(id){
       </aside>
       <div>
         <div class="body">${body||"<p></p>"}</div>
-        ${galItems.length?`<div class="art-block"><h4>Galería</h4><div class="art-gal">${galItems.map((g,i)=>`<button data-g="${i}" aria-label="Ver imagen ${i+1}"><img src="${blobUrl(g)}" alt="" loading="lazy"></button>`).join("")}</div></div>`:""}
         ${vids?`<div class="art-block"><h4>Video y multimedia</h4><div class="art-vid">${vids}</div></div>`:""}
+        ${galItems.length?`<div class="art-block"><h4>Galería</h4><div class="art-gal">${galItems.map((g,i)=>`<button data-g="${i}" aria-label="Ver imagen ${i+1}"><img src="${blobUrl(g)}" alt="" loading="lazy"></button>`).join("")}</div></div>`:""}
         ${links?`<div class="art-block"><h4>Enlaces relacionados</h4><div class="art-links">${links}</div></div>`:""}
         ${(p.tags||[]).length?`<div class="art-block"><h4>Etiquetas</h4><div class="tags">${p.tags.map(t=>`<button data-tag="${esc(t)}">#${esc(t)}</button>`).join("")}</div></div>`:""}
         <div class="art-block"><div class="press-box"><h4>${isPress?"Contacto para medios":"¿Eres medio de comunicación?"}</h4><p>Para entrevistas, material adicional o información de AFTERA contáctanos.</p>
@@ -1760,6 +1780,7 @@ function renderArticle(id){
     </div>
     ${rel.length?`<section class="art-rel"><div class="nr-sec-t"><h2>Noticias relacionadas</h2><span>Sigue leyendo</span></div><div class="nr-grid">${rel.map(x=>card(x)).join("")}</div></section>`:""}
   </article>`;
+  fitDrive();
   q("#artCopy").onclick=async()=>{try{await navigator.clipboard.writeText(url);toast("Enlace copiado")}catch(e){toast(url)}};
   el.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>openGal(+b.dataset.g));
   const desc=p.excerpt||plain(body).slice(0,155);
