@@ -498,8 +498,14 @@ body.nr-mode .cursor{mix-blend-mode:normal;background:var(--violet);opacity:.55}
 .vid-frame iframe,.vid-frame video{width:100%;height:100%;border:0;display:block;border-radius:0}
 /* Drive: el reproductor se dibuja a 1920×1080 más dos franjas de 170px (sus controles), que quedan fuera del recuadro */
 .vid-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.vid-frame.yt{--bw:1920;--bh:1080}.vid-frame.tall.yt{--bw:1080;--bh:1920}
+.vid-frame.yt iframe{position:absolute;left:50%;top:50%;width:calc(var(--bw)*1px);height:calc(var(--bh)*1px);transform-origin:0 0;transform:translate(calc(var(--bw)*-.5px*var(--s,1)),calc(var(--bh)*-.5px*var(--s,1))) scale(var(--s,1))}.vid-frame.yt.hold .vid-poster{z-index:2}.vid-frame.yt{cursor:pointer}.vid-frame.yt.live::after{content:"";position:absolute;inset:0;z-index:2}
+.vid-ctl{display:none;position:absolute;right:12px;bottom:12px;z-index:3;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100% - 24px);opacity:0;pointer-events:none;transition:opacity .2s}.vid-frame.live .vid-ctl{display:flex}
+.vid-frame.ui .vid-ctl,.vid-frame.paused .vid-ctl,.vid-ctl:hover,.vid-ctl:focus-within{opacity:1;pointer-events:auto}
+.vid-frame:fullscreen{width:100%;height:100%;max-width:none;aspect-ratio:auto;border-radius:0}
+.vid-btn{border:0;border-radius:999px;padding:9px 14px;font-family:inherit;font-size:13px;font-weight:600;line-height:1;color:#fff;background:rgba(11,11,15,.72);cursor:pointer;white-space:nowrap}.vid-btn:focus-visible{outline:2px solid #fff;outline-offset:2px}.vid-btn.vid-snd,.vid-btn.vid-fs{display:inline-flex;padding:6.5px}.vid-btn svg{display:block;width:18px;height:18px}
 .vid-frame.tap .vid-poster{z-index:2;pointer-events:none}.vid-frame.tap.live .vid-poster{visibility:hidden}
-.vid-frame.tap.ready:not(.live)::after{content:"";position:absolute;z-index:3;pointer-events:none;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:rgba(11,11,15,.62) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M5.5 3.5v9l7.5-4.5z' fill='%23fff'/%3E%3C/svg%3E") center/28px no-repeat}
+.vid-frame.tap.ready:not(.live)::after,.vid-frame.yt.paused::before{content:"";position:absolute;z-index:3;pointer-events:none;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:rgba(11,11,15,.62) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M5.5 3.5v9l7.5-4.5z' fill='%23fff'/%3E%3C/svg%3E") center/28px no-repeat}
 .vid-frame.crop iframe{position:absolute;left:0;top:calc(-170px*var(--s,1));width:1920px;height:1420px;transform-origin:0 0;transform:scale(var(--s,1))}
 .linkcard{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:18px 20px;border:1.5px solid var(--ink);border-radius:12px;font-weight:600;transition:all .25s}
 .linkcard small{display:block;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--violet);font-weight:700}
@@ -1550,10 +1556,12 @@ function mdToHtml(text){
 }
 // enlace de compartir de Google Drive → imagen directa (el archivo debe estar compartido con "cualquier persona con el enlace")
 // Enlace de video de la hoja → reproductor dentro de la nota ({src,tall} iframe, {file} video directo o null = tarjeta)
+// YouTube: sin barra de controles, arranca solo en silencio y acepta órdenes del sitio (enablejsapi)
+const YT_Q="?controls=0&fs=0&disablekb=1&autoplay=1&mute=1&playsinline=1&rel=0&enablejsapi=1";
 function videoEmbed(u){
   const s=safeUrl(String(u||"").trim());if(!s)return null;let m;
-  if(m=s.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]{6,})/))return {src:"https://www.youtube-nocookie.com/embed/"+m[1],tall:true};
-  if(m=s.match(/(?:youtube\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/))return {src:"https://www.youtube-nocookie.com/embed/"+m[1]};
+  if(m=s.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]{6,})/))return {src:"https://www.youtube-nocookie.com/embed/"+m[1]+YT_Q,tall:true,yt:true,poster:"https://i.ytimg.com/vi/"+m[1]+"/hqdefault.jpg"};
+  if(m=s.match(/(?:youtube\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/))return {src:"https://www.youtube-nocookie.com/embed/"+m[1]+YT_Q,yt:true,poster:"https://i.ytimg.com/vi/"+m[1]+"/hqdefault.jpg"};
   if(m=s.match(/vimeo\.com\/(?:video\/)?(\d+)/))return {src:"https://player.vimeo.com/video/"+m[1]};
   if(m=s.match(/drive\.google\.com\/(?:file\/d\/|open\?(?:[^#]*&)?id=)([A-Za-z0-9_-]+)/))return {src:"https://drive.google.com/file/d/"+m[1]+"/preview?autoplay=1",drive:true,poster:"https://drive.google.com/thumbnail?id="+m[1]+"&sz=w1280"};
   if(m=s.match(/instagram\.com\/(?:[A-Za-z0-9_.]+\/)?(?:p|reels?|tv)\/([A-Za-z0-9_-]+)/))return {src:"https://www.instagram.com/p/"+m[1]+"/embed",tall:true};
@@ -1575,6 +1583,32 @@ function driveOn(f,auto){if(f.querySelector("iframe"))return;const i=document.cr
 function driveOff(f){const i=f.querySelector("iframe");if(i){const had=document.activeElement===i;i.remove();if(had)window.focus()}f.classList.remove("live","ready")}
 const driveIO=window.IntersectionObserver?new IntersectionObserver(es=>es.forEach(e=>{const f=e.target;if(!e.isIntersecting)driveOff(f);else if(!driveAuto)driveOn(f,false);else if(e.intersectionRatio>=.6)driveOn(f,true)}),{threshold:[0,.6]}):null;
 function fitDrive(){if(driveRO)driveRO.disconnect();if(driveIO)driveIO.disconnect();document.querySelectorAll(".vid-frame.crop").forEach(f=>{f.style.setProperty("--s",f.clientWidth/1920);const im=f.querySelector(".vid-poster");if(im)im.onerror=()=>{im.onerror=()=>im.remove();setTimeout(()=>{im.src=im.src},1500)};if(!driveAuto)f.classList.add("tap");if(driveRO)driveRO.observe(f);if(driveIO)driveIO.observe(f);else driveOn(f,driveAuto)})}
+// Reproductores de YouTube: el iframe se crea al llegar (arranca en silencio), se pausa al salir y sigue al volver; el botón activa el sonido
+const YT_ORIGIN="https://www.youtube-nocookie.com";
+function ytCmd(f,func,args){const i=f.querySelector("iframe");if(i&&i.contentWindow)i.contentWindow.postMessage(JSON.stringify({event:"command",func,args:args||[]}),YT_ORIGIN)}
+// Apaga los subtítulos, que YouTube suele encender cuando el video arranca en silencio
+// YouTube avisa en qué segundo va (tras el saludo "listening"); hace falta para atrasar y adelantar
+function ytHello(f){const i=f.querySelector("iframe");if(i&&i.contentWindow)i.contentWindow.postMessage(JSON.stringify({event:"listening",id:1,channel:"widget"}),YT_ORIGIN)}
+// Estado del reproductor: YouTube avisa el segundo y si reproduce (1), está en pausa (2) o terminó (0)
+addEventListener("message",e=>{if(e.origin!==YT_ORIGIN||typeof e.data!=="string")return;let d;try{d=JSON.parse(e.data)}catch(_){return}const n=d&&d.info;if(!n)return;document.querySelectorAll(".vid-frame.yt").forEach(f=>{const i=f.querySelector("iframe");if(!i||i.contentWindow!==e.source)return;if(typeof n.currentTime==="number"&&!(f._hold>Date.now()))f._t=n.currentTime;if(typeof n.playerState==="number"){f._s=n.playerState;if(n.playerState===1&&!f._user)f.classList.remove("hold","paused");else if(n.playerState===0){f._user=true;f.classList.add("hold","paused")}else if(n.playerState===2)f.classList.add("hold")}})});
+// Mientras no reproduce, la miniatura tapa el reproductor: así nunca se ve la marca de YouTube (título, logo, sugeridos)
+function ytPlay(f){f._user=false;f.classList.remove("paused");if(f._s===0){f._t=0;ytCmd(f,"seekTo",[0,true])}ytCmd(f,"playVideo");ytNoCC(f);clearTimeout(f._rt);f._rt=setTimeout(()=>{if(f._s==null&&!f._user)f.classList.remove("hold")},1500)}
+function ytPause(f,user){if(user){f._user=true;f.classList.add("paused")}f.classList.add("hold");ytCmd(f,"pauseVideo")}
+function ytToggle(f){if(f._user||f.classList.contains("paused"))ytPlay(f);else ytPause(f,true)}
+function ytSeek(f,step){f._t=Math.max(0,(f._t||0)+step);f._hold=Date.now()+700;ytCmd(f,"seekTo",[f._t,true]);if(f._s===0)f._s=2;ytPlay(f)}
+function ytNoCC(f){ytCmd(f,"unloadModule",["captions"]);ytCmd(f,"setOption",["captions","track",{}])}
+// Los botones se muestran al mover el ratón o tocar el video y se esconden solos
+function ytUI(f){f.classList.add("ui");clearTimeout(f._ut);f._ut=setTimeout(()=>f.classList.remove("ui"),2500)}
+const ytSvg=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+const YT_ICO={off:ytSvg("M4 9v6h4l5 4V5L8 9H4zM17 9l5 6M22 9l-5 6"),on:ytSvg("M4 9v6h4l5 4V5L8 9H4zM16.5 8.5a5 5 0 0 1 0 7M19.5 5.5a9 9 0 0 1 0 13"),full:ytSvg("M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"),exit:ytSvg("M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5")};
+function ytLabels(f){const set=(b,ico,txt)=>{if(!b)return;b.innerHTML=ico;b.setAttribute("aria-label",txt);b.title=txt};const b=f.querySelector(".vid-snd"),on=b&&b.getAttribute("aria-pressed")==="true",fs=document.fullscreenElement===f;set(b,on?YT_ICO.on:YT_ICO.off,on?"Quitar sonido":"Activar sonido");set(f.querySelector(".vid-fs"),fs?YT_ICO.exit:YT_ICO.full,fs?"Salir de pantalla completa":"Pantalla completa")}
+document.addEventListener("fullscreenchange",()=>document.querySelectorAll(".vid-frame.yt").forEach(ytLabels));
+function ytOn(f){if(f.querySelector("iframe")){if(!f._user)ytPlay(f);return}const i=document.createElement("iframe");i.src=f.dataset.src+"&origin="+encodeURIComponent(location.origin);i.title="Video";i.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";i.onload=()=>{[800,2500,5000].forEach(t=>setTimeout(()=>{ytHello(f);ytNoCC(f)},t));setTimeout(()=>{if(f._s==null)f.classList.remove("hold");else if(f._s!==1&&f._s!==3&&!f._user)f.classList.add("paused")},4000)};f.insertBefore(i,f.querySelector(".vid-ctl"));f.classList.add("live","hold");ytLabels(f)}
+// El reproductor se dibuja a 1920×1080 y se encoge al recuadro: YouTube elige la calidad por tamaño y así arranca en 1080p
+function ytFit(f){const t=f.classList.contains("tall");f.style.setProperty("--s",Math.min(f.clientWidth/(t?1080:1920),f.clientHeight/(t?1920:1080)))}
+const ytRO=window.ResizeObserver?new ResizeObserver(es=>es.forEach(e=>ytFit(e.target))):null;
+const ytIO=window.IntersectionObserver?new IntersectionObserver(es=>es.forEach(e=>{const f=e.target;if(e.intersectionRatio>=.6)ytOn(f);else if(!e.isIntersecting&&f.querySelector("iframe")&&document.fullscreenElement!==f)ytPause(f,false)}),{threshold:[0,.6]}):null;
+function fitYT(){if(ytIO)ytIO.disconnect();if(ytRO)ytRO.disconnect();document.querySelectorAll(".vid-frame.yt").forEach(f=>{ytFit(f);if(ytRO)ytRO.observe(f);f.onpointermove=()=>ytUI(f);f.onclick=e=>{ytUI(f);if(!e.target.closest(".vid-ctl"))ytToggle(f)};f.querySelectorAll("[data-seek]").forEach(k=>k.onclick=()=>ytSeek(f,+k.dataset.seek));const b=f.querySelector(".vid-snd");if(b)b.onclick=()=>{const on=b.getAttribute("aria-pressed")!=="true";ytCmd(f,on?"unMute":"mute");ytNoCC(f);b.setAttribute("aria-pressed",on);ytLabels(f)};const k=f.querySelector(".vid-fs");if(k){if(!f.requestFullscreen)k.remove();else k.onclick=()=>{if(document.fullscreenElement===f)document.exitFullscreen();else f.requestFullscreen().catch(()=>{})}}ytLabels(f);if(ytIO)ytIO.observe(f);else ytOn(f)})}
 function imgUrl(u){
   const s=String(u||"").trim(),m=s.match(/drive\.google\.com\/(?:file\/d\/|open\?(?:[^#]*&)?id=|uc\?(?:[^#]*&)?id=)([A-Za-z0-9_-]+)/);
   return m?"https://drive.google.com/thumbnail?id="+m[1]+"&sz=w2000":safeUrl(s);
@@ -1758,7 +1792,7 @@ function renderArticle(id){
   const live=isLive(p), isPress=p.category===PRESS, body=sanitize(p.body), words=plain(body).split(" ").filter(Boolean).length, mins=Math.max(1,Math.round(words/200));
   const url=shareUrl(p), enc=encodeURIComponent, txt=enc(p.title);
   galItems=(p.gallery||[]).filter(Boolean);
-  const vids=(p.videos||[]).map(v=>{const e=v.kind==="file"?null:videoEmbed(v.url);return e?`<figure class="vid"><div class="vid-frame${e.tall?" tall":""}${e.drive?` crop" data-src="${esc(e.src)}`:""}">${e.drive?`<img class="vid-poster" src="${esc(e.poster)}" alt="" loading="lazy">`:e.file?`<video controls preload="metadata" src="${esc(e.file)}"></video>`:`<iframe src="${esc(e.src)}" title="${esc(v.label||"Video")}" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture; fullscreen"></iframe>`}</div></figure>`:v.kind==="file"?`<video controls preload="metadata" src="${blobUrl(v.id)}"></video>`:safeUrl(v.url)?`<a class="linkcard" href="${esc(v.url)}" target="_blank" rel="noopener"><span><small>Video · ${esc(host(v.url))}</small>${esc(v.label||"Ver video")}</span><span><svg class="i-arr" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg></span></a>`:""}).join("");
+  const vids=(p.videos||[]).map(v=>{const e=v.kind==="file"?null:videoEmbed(v.url);return e?`<figure class="vid"><div class="vid-frame${e.tall?" tall":""}${e.drive?` crop" data-src="${esc(e.src)}`:e.yt?` yt" data-src="${esc(e.src)}`:""}">${e.drive?`<img class="vid-poster" src="${esc(e.poster)}" alt="" loading="lazy">`:e.yt?`<img class="vid-poster" src="${esc(e.poster)}" alt="" loading="lazy"><div class="vid-ctl"><button class="vid-btn" type="button" data-seek="-10" aria-label="Atrasar 10 segundos">−10 s</button><button class="vid-btn" type="button" data-seek="10" aria-label="Adelantar 10 segundos">+10 s</button><button class="vid-btn vid-snd" type="button" aria-pressed="false" aria-label="Activar sonido"></button><button class="vid-btn vid-fs" type="button" aria-label="Pantalla completa"></button></div>`:e.file?`<video controls preload="metadata" src="${esc(e.file)}"></video>`:`<iframe src="${esc(e.src)}" title="${esc(v.label||"Video")}" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture; fullscreen"></iframe>`}</div></figure>`:v.kind==="file"?`<video controls preload="metadata" src="${blobUrl(v.id)}"></video>`:safeUrl(v.url)?`<a class="linkcard" href="${esc(v.url)}" target="_blank" rel="noopener"><span><small>Video · ${esc(host(v.url))}</small>${esc(v.label||"Ver video")}</span><span><svg class="i-arr" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg></span></a>`:""}).join("");
   const links=(p.links||[]).filter(l=>safeUrl(l.url)).map(l=>`<a class="linkcard" href="${esc(l.url)}" target="_blank" rel="noopener"><span><small>${esc(host(l.url))}</small>${esc(l.label||l.url)}</span><span><svg class="i-arr" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4.5 11.5l7-7M6 4.5h5.5V10"/></svg></span></a>`).join("");
   const rel=[...visible().filter(x=>x.id!==p.id&&x.category===p.category),...visible().filter(x=>x.id!==p.id&&x.category!==p.category)].slice(0,3);
   el.innerHTML=`<article class="art">
@@ -1794,7 +1828,7 @@ function renderArticle(id){
     </div>
     ${rel.length?`<section class="art-rel"><div class="nr-sec-t"><h2>Noticias relacionadas</h2><span>Sigue leyendo</span></div><div class="nr-grid">${rel.map(x=>card(x)).join("")}</div></section>`:""}
   </article>`;
-  fitDrive();
+  fitDrive();fitYT();
   q("#artCopy").onclick=async()=>{try{await navigator.clipboard.writeText(url);toast("Enlace copiado")}catch(e){toast(url)}};
   el.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>openGal(+b.dataset.g));
   const desc=p.excerpt||plain(body).slice(0,155);
